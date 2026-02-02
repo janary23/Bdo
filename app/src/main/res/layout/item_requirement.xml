@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="12dp"
+    android:background="@drawable/bg_info_box"
+    android:backgroundTint="#F0FDF4"
+    android:layout_marginBottom="8dp">
+
+    <!-- Icon -->
+    <ImageView
+        android:id="@+id/reqIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_check_circle"
+        android:padding="2dp"
+        app:tint="#15803D"/>
+
+    <!-- Text Info -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginStart="12dp">
+        
+        <TextView
+            android:id="@+id/reqTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Valid ID"
+            android:textStyle="bold"
+            android:textColor="#15803D"
+            android:textSize="14sp"/>
+            
+        <LinearLayout
+            android:id="@+id/bonusContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <ImageView
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:src="@drawable/ic_trending_up"
+                app:tint="@color/blue_600"/>
+            <TextView
+                android:id="@+id/bonusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+₱5,000 Limit"
+                android:textColor="@color/blue_600"
+                android:textStyle="bold"
+                android:textSize="10sp"
+                android:layout_marginStart="2dp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Status Action/Icon -->
+    <LinearLayout
+        android:id="@+id/statusContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
+        
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_check_circle"
+            app:tint="#15803D"/>
+            
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Verified"
+            android:textStyle="bold"
+            android:textColor="#15803D"
+            android:textSize="12sp"
+            android:layout_marginStart="4dp"/>
+    </LinearLayout>
+
+</LinearLayout>

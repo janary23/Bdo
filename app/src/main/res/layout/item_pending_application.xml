@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/bg_rounded_white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_description"
+            android:padding="8dp"
+            android:background="@drawable/bg_info_box"
+            android:backgroundTint="@color/yellow_50"
+            app:tint="@color/yellow_600"/>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
+
+            <TextView
+                android:id="@+id/pendingAppLoanType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Personal Loan"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/pendingAppAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="₱50,000.00"
+                android:textColor="@color/gray_600"
+                android:textSize="12sp"
+                android:layout_marginTop="2dp"/>
+
+            <TextView
+                android:id="@+id/pendingAppDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Applied: Jan 15, 2026"
+                android:textColor="@color/gray_500"
+                android:textSize="11sp"
+                android:layout_marginTop="2dp"/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PENDING"
+            android:background="@drawable/bg_info_box"
+            android:backgroundTint="@color/yellow_50"
+            android:textColor="@color/yellow_700"
+            android:textStyle="bold"
+            android:textSize="10sp"
+            android:padding="6dp"
+            android:paddingHorizontal="12dp"/>
+    </LinearLayout>
+
+</LinearLayout>

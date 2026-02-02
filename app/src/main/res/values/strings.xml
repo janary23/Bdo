@@ -1,0 +1,47 @@
+<resources>
+    <string name="app_name">BDO Loans</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="login_title">Welcome Back</string>
+    <string name="login_subtitle">Sign in to access your account</string>
+    <string name="email_hint">Email or Username</string>
+    <string name="password_hint">Password</string>
+    <string name="login_button">Log In</string>
+    <string name="register_prompt">Don\'t have an account?</string>
+    <string name="register_link">Register here</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="remember_me">Keep me logged in</string>
+    <!-- Registration Strings -->
+    <string name="step_1_title">Personal Info</string>
+    <string name="step_2_title">Employment</string>
+    <string name="step_3_title">Review</string>
+    <string name="next_button">Next</string>
+    <string name="prev_button">Back</string>
+    <string name="submit_button">Submit Application</string>
+    <string name="first_name_hint">First Name</string>
+    <string name="last_name_hint">Last Name</string>
+    <string name="dob_hint">Date of Birth</string>
+    <string name="mobile_hint">Mobile Number</string>
+    <string name="address_hint">Residential Address</string>
+    <string name="income_hint">Monthly Net Income</string>
+    <string name="employer_hint">Employer Name</string>
+    <string-array name="nationalities">
+        <item>Philippines</item>
+        <item>United States</item>
+        <item>United Kingdom</item>
+        <item>Canada</item>
+        <item>Singapore</item>
+        <item>Japan</item>
+        <item>Australia</item>
+    </string-array>
+    
+    <string-array name="employment_status">
+        <item>Full-Time Employed</item>
+        <item>Part-Time Employed</item>
+        <item>Self-Employed</item>
+        <item>Freelancer</item>
+        <item>Retired</item>
+        <item>Student</item>
+        <item>Unemployed</item>
+    </string-array>
+</resources>
