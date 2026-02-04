@@ -68,14 +68,24 @@
             android:textColor="@color/blue_900"
             android:layout_marginBottom="12dp"/>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/activeLoansRecycler"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:nestedScrollingEnabled="false"
-            tools:itemCount="1"
-            tools:listitem="@layout/item_active_loan"/>
+            android:layout_marginBottom="16dp">
+            
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/activeLoansRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                tools:itemCount="1"
+                tools:listitem="@layout/item_active_loan"/>
+                
+            <include
+                android:id="@+id/emptyStateActiveLoans"
+                layout="@layout/layout_empty_state"
+                android:visibility="gone"/>
+        </FrameLayout>
 
         <TextView
             android:layout_width="wrap_content"
@@ -92,13 +102,24 @@
             app:cardCornerRadius="12dp"
             app:cardElevation="1dp">
             
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/paymentHistoryRecycler"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                tools:itemCount="3"
-                tools:listitem="@layout/item_payment_history"/>
+                android:orientation="vertical">
+                
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/paymentHistoryRecycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    tools:itemCount="3"
+                    tools:listitem="@layout/item_payment_history"/>
+                    
+                <include
+                    android:id="@+id/emptyStatePayments"
+                    layout="@layout/layout_empty_state"
+                    android:visibility="gone"/>
+            </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>

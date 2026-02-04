@@ -176,9 +176,10 @@
                             android:textColor="@color/gray_800"/>
 
                         <TextView
+                            android:id="@+id/tvProgress"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="3 / 5 Completed"
+                            android:text="0 / 0 Completed"
                             android:textSize="12sp"
                             android:textColor="@color/gray_500"
                             android:background="@color/white"

@@ -25,6 +25,12 @@ class DashboardFragment : Fragment() {
     private var welcomeText: TextView? = null
     private var tvViewAllApps: TextView? = null
     private var tvManageAppts: TextView? = null
+    
+    // RecyclerViews & Adapters
+    private lateinit var recentAppsRecyclerView: androidx.recyclerview.widget.RecyclerView
+    private lateinit var upcomingApptsRecyclerView: androidx.recyclerview.widget.RecyclerView
+    private lateinit var recentAppsAdapter: RecentAppsAdapter
+    private lateinit var appointmentsAdapter: DashboardAppointmentsAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,6 +38,7 @@ class DashboardFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_dashboard, container, false)
         initializeViews(view)
+        setupRecyclerViews(view)
         loadDashboardStats()
         return view
     }
@@ -55,22 +62,23 @@ class DashboardFragment : Fragment() {
         tvViewAllApps?.setOnClickListener {
             (activity as? DashboardActivity)?.loadFragment(LoansFragment())
         }
-        
-        // Item Clicks
-        view.findViewById<View>(R.id.recentAppItem1)?.setOnClickListener {
-            (activity as? DashboardActivity)?.loadFragment(LoansFragment())
-        }
-        view.findViewById<View>(R.id.recentAppItem2)?.setOnClickListener {
-             (activity as? DashboardActivity)?.loadFragment(LoansFragment())
-        }
 
         tvManageAppts?.setOnClickListener {
             (activity as? DashboardActivity)?.loadFragment(AppointmentsFragment())
         }
         
-        view.findViewById<View>(R.id.apptItem1)?.setOnClickListener {
-             (activity as? DashboardActivity)?.loadFragment(AppointmentsFragment())
-        }
+    }
+    
+    private fun setupRecyclerViews(view: View) {
+        // Recent Apps
+        recentAppsRecyclerView = view.findViewById(R.id.recentAppsRecyclerView)
+        recentAppsAdapter = RecentAppsAdapter(emptyList())
+        recentAppsRecyclerView.adapter = recentAppsAdapter
+        
+        // Upcoming Appointments
+        upcomingApptsRecyclerView = view.findViewById(R.id.upcomingApptsRecyclerView)
+        appointmentsAdapter = DashboardAppointmentsAdapter(emptyList())
+        upcomingApptsRecyclerView.adapter = appointmentsAdapter
     }
 
     private fun loadDashboardStats() {
@@ -83,17 +91,48 @@ class DashboardFragment : Fragment() {
         
         lifecycleScope.launch {
             try {
-                val response = ApiClient.apiService.getDashboardStats(userId)
-                
-                if (response.isSuccessful && response.body()?.success == true) {
-                    val stats = response.body()?.stats
-                    
+                // 1. Dashboard Stats
+                val statsResponse = ApiClient.apiService.getDashboardStats(userId)
+                if (statsResponse.isSuccessful && statsResponse.body()?.success == true) {
+                    val stats = statsResponse.body()?.stats
                     if (stats != null) {
                         populateStats(stats)
                     }
-                } else {
-                    Toast.makeText(context, "Failed to load dashboard data", Toast.LENGTH_SHORT).show()
                 }
+                
+                // 2. Recent Applications (Latest 3)
+                val appsResponse = ApiClient.apiService.getUserApplications(userId)
+                if (appsResponse.isSuccessful && appsResponse.body()?.success == true) {
+                    val allApps = appsResponse.body()?.applications ?: emptyList()
+                    val recentApps = allApps.take(3)
+                    
+                    if (recentApps.isNotEmpty()) {
+                        recentAppsAdapter.updateData(recentApps)
+                        requireView().findViewById<View>(R.id.recentAppsRecyclerView).visibility = View.VISIBLE
+                        requireView().findViewById<View>(R.id.tvNoRecentApps).visibility = View.GONE
+                    } else {
+                        requireView().findViewById<View>(R.id.recentAppsRecyclerView).visibility = View.GONE
+                        requireView().findViewById<View>(R.id.tvNoRecentApps).visibility = View.VISIBLE
+                    }
+                }
+
+                // 3. Upcoming Appointments (Latest 3)
+                val apptsResponse = ApiClient.apiService.getAppointments(userId)
+                if (apptsResponse.isSuccessful && apptsResponse.body()?.success == true) {
+                    val allAppts = apptsResponse.body()?.appointments ?: emptyList()
+                    // Filter for future/pending if needed, for now just take 3
+                    val upcoming = allAppts.take(3)
+                    
+                    if (upcoming.isNotEmpty()) {
+                        appointmentsAdapter.updateData(upcoming)
+                        requireView().findViewById<View>(R.id.upcomingApptsRecyclerView).visibility = View.VISIBLE
+                        requireView().findViewById<View>(R.id.tvNoAppts).visibility = View.GONE
+                    } else {
+                        requireView().findViewById<View>(R.id.upcomingApptsRecyclerView).visibility = View.GONE
+                        requireView().findViewById<View>(R.id.tvNoAppts).visibility = View.VISIBLE
+                    }
+                }
+                
             } catch (e: Exception) {
                 Toast.makeText(context, "Network error: ${e.message}", Toast.LENGTH_SHORT).show()
                 e.printStackTrace()

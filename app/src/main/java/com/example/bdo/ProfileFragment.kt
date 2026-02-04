@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import androidx.appcompat.app.AlertDialog
 
 class ProfileFragment : Fragment() {
 
@@ -42,12 +43,34 @@ class ProfileFragment : Fragment() {
         }
         
         view.findViewById<View>(R.id.btnLogout).setOnClickListener {
-            logout()
+            showLogoutConfirmation()
         }
         
         return view
     }
     
+    private fun showLogoutConfirmation() {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_logout_confirmation, null)
+        
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        dialogView.findViewById<View>(R.id.btnCancel).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<View>(R.id.btnLogoutConfirm).setOnClickListener {
+            dialog.dismiss()
+            logout()
+        }
+        
+        // Transparent background to let the CardView corners show
+        dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+        dialog.show()
+    }
+
     private fun logout() {
         // Clear session
         SessionManager.clearSession(requireContext())

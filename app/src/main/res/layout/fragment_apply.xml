@@ -100,75 +100,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- My Pending Applications Section (Hidden by default) -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/pendingApplicationsCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/white"
-            android:layout_marginBottom="24dp"
-            android:visibility="gone">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <!-- Header -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp"
-                    android:background="@color/blue_50"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_description"
-                        app:tint="@color/blue_900"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="My Pending Applications"
-                        android:textColor="@color/blue_900"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:layout_marginStart="12dp"/>
-
-                    <TextView
-                        android:id="@+id/pendingAppsCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="2"
-                        android:background="@drawable/bg_info_box"
-                        android:backgroundTint="@color/blue_600"
-                        android:textColor="@color/white"
-                        android:textStyle="bold"
-                        android:textSize="12sp"
-                        android:padding="4dp"
-                        android:paddingHorizontal="8dp"
-                        android:minWidth="24dp"
-                        android:gravity="center"/>
-                </LinearLayout>
-
-                <!-- List of pending applications -->
-                <LinearLayout
-                    android:id="@+id/pendingApplicationsList"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="8dp">
-                    <!-- Items will be added dynamically -->
-                </LinearLayout>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
         <!-- Credit Limit Card -->
         <FrameLayout
             android:layout_width="match_parent"
@@ -197,14 +128,15 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Credit Limit"
+                            android:text="Available Limit"
                             android:textColor="@color/white"
                             android:textStyle="bold"
                             android:textSize="18sp"/>
                         <TextView
+                            android:id="@+id/totalLimitText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Based on verified income"
+                            android:text="Loading limit..."
                             android:textColor="#BFDBFE"
                             android:textSize="12sp"/>
                     </LinearLayout>
@@ -269,6 +201,88 @@
                 </LinearLayout>
             </LinearLayout>
         </FrameLayout>
+
+        <!-- My Pending Applications Section (Hidden by default) -->
+        <!-- My Pending Applications Button (Visible if there are pending apps) -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/pendingApplicationsCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="@color/white"
+            android:layout_marginBottom="24dp"
+            android:foreground="?selectableItemBackground"
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_circle_soft_white"
+                    android:backgroundTint="#EFF6FF">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_description"
+                        app:tint="@color/blue_600"
+                        android:layout_gravity="center"/>
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+                    
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="My Pending Applications"
+                        android:textColor="@color/blue_900"
+                        android:textStyle="bold"
+                        android:textSize="16sp"/>
+                        
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tap to view details"
+                        android:textColor="@color/gray_400"
+                        android:textSize="12sp"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/pendingAppsCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2"
+                    android:background="@drawable/bg_info_box"
+                    android:backgroundTint="@color/blue_600"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
+                    android:padding="4dp"
+                    android:paddingHorizontal="10dp"
+                    android:minWidth="24dp"
+                    android:gravity="center"/>
+                    
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="@color/gray_400"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
         <!-- Limit Booster (New) -->
         <androidx.cardview.widget.CardView
@@ -400,16 +414,16 @@
                     android:layout_height="match_parent"
                     android:background="#80FFFFFF"
                     android:visibility="gone">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="PENDING"
-                        android:background="#FEF3C7"
-                        android:textColor="#92400E"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:padding="4dp"
-                        android:layout_gravity="center"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="NOT AVAILABLE"
+                            android:background="#F3F4F6"
+                            android:textColor="#374151"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:padding="4dp"
+                            android:layout_gravity="center"/>
                 </FrameLayout>
             </FrameLayout>
             
@@ -466,16 +480,16 @@
                     android:layout_height="match_parent"
                     android:background="#80FFFFFF"
                     android:visibility="gone">
-                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="PENDING"
-                        android:background="#FEF3C7"
-                        android:textColor="#92400E"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:padding="4dp"
-                        android:layout_gravity="center"/>
+                         <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="NOT AVAILABLE"
+                            android:background="#F3F4F6"
+                            android:textColor="#374151"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:padding="4dp"
+                            android:layout_gravity="center"/>
                 </FrameLayout>
             </FrameLayout>
 
@@ -531,16 +545,16 @@
                     android:layout_height="match_parent"
                     android:background="#80FFFFFF"
                     android:visibility="gone">
-                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="PENDING"
-                        android:background="#FEF3C7"
-                        android:textColor="#92400E"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:padding="4dp"
-                        android:layout_gravity="center"/>
+                         <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="NOT AVAILABLE"
+                            android:background="#F3F4F6"
+                            android:textColor="#374151"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:padding="4dp"
+                            android:layout_gravity="center"/>
                 </FrameLayout>
             </FrameLayout>
         </LinearLayout>

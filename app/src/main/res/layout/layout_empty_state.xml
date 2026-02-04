@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp">
+
+    <FrameLayout
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_circle_soft_white">
+        
+        <ImageView
+            android:id="@+id/imgEmptyState"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_description"
+            android:padding="20dp"
+            app:tint="@color/gray_300"/>
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tvEmptyTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No Data Available"
+        android:textStyle="bold"
+        android:textColor="@color/gray_500"
+        android:textSize="16sp"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/tvEmptySubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="There are no items to show at the moment."
+        android:textColor="@color/gray_400"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:layout_marginTop="4dp"/>
+
+</LinearLayout>

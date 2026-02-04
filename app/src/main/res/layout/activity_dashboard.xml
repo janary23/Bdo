@@ -6,6 +6,8 @@
     android:layout_height="match_parent"
     tools:context=".DashboardActivity">
 
+
+
     <!-- Top Toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
@@ -18,8 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/blue_900"
-            app:title="Dashboard"
-            app:titleTextColor="@color/white" />
+            app:title="" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- Fragment Container -->
@@ -28,6 +29,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/appBarLayout"
+
         android:layout_above="@id/bottomNavigation"
         android:background="#F3F4F6"/>
 

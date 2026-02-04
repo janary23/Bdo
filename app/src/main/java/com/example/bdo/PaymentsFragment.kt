@@ -21,6 +21,8 @@ class PaymentsFragment : Fragment() {
 
     private lateinit var activeLoansRecycler: RecyclerView
     private lateinit var paymentHistoryRecycler: RecyclerView
+    private lateinit var emptyStateActiveLoans: View
+    private lateinit var emptyStatePayments: View
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,6 +32,8 @@ class PaymentsFragment : Fragment() {
 
         activeLoansRecycler = view.findViewById(R.id.activeLoansRecycler)
         paymentHistoryRecycler = view.findViewById(R.id.paymentHistoryRecycler)
+        emptyStateActiveLoans = view.findViewById(R.id.emptyStateActiveLoans)
+        emptyStatePayments = view.findViewById(R.id.emptyStatePayments)
 
         loadActiveLoans()
         loadPaymentHistory()
@@ -51,14 +55,22 @@ class PaymentsFragment : Fragment() {
                 
                 if (response.isSuccessful && response.body()?.success == true) {
                     val loans = response.body()?.loans ?: emptyList()
+                    val activeLoansList = loans.filter { it.status == "Active" } // Only show active
                     
-                    if (loans.isEmpty()) {
+                    if (activeLoansList.isEmpty()) {
                         activeLoansRecycler.visibility = View.GONE
+                        emptyStateActiveLoans.visibility = View.VISIBLE
+                        
+                        val tvTitle = emptyStateActiveLoans.findViewById<TextView>(R.id.tvEmptyTitle)
+                        val tvSubtitle = emptyStateActiveLoans.findViewById<TextView>(R.id.tvEmptySubtitle)
+                        tvTitle.text = "No Active Loans"
+                        tvSubtitle.text = "You don't have any active loans at the moment."
                     } else {
                         activeLoansRecycler.visibility = View.VISIBLE
+                        emptyStateActiveLoans.visibility = View.GONE
                         
                         // Convert to ActiveLoan format
-                        val activeLoans = loans.filter { it.status == "Active" }.map { loan ->
+                        val activeLoans = activeLoansList.map { loan ->
                             val formatCurrency = NumberFormat.getCurrencyInstance(Locale("en", "PH"))
                             val progress = loan.progress ?: 0
                             
@@ -81,11 +93,13 @@ class PaymentsFragment : Fragment() {
                         activeLoansRecycler.adapter = ActiveLoanAdapter(activeLoans)
                     }
                 } else {
-                    Toast.makeText(context, "Failed to load loans", Toast.LENGTH_SHORT).show()
+                    activeLoansRecycler.visibility = View.GONE
+                    emptyStateActiveLoans.visibility = View.VISIBLE
                 }
             } catch (e: Exception) {
-                Toast.makeText(context, "Network error: ${e.message}", Toast.LENGTH_SHORT).show()
-                e.printStackTrace()
+                // Keep empty state visible on error
+                 activeLoansRecycler.visibility = View.GONE
+                 emptyStateActiveLoans.visibility = View.VISIBLE
             }
         }
     }
@@ -106,8 +120,15 @@ class PaymentsFragment : Fragment() {
                     
                     if (payments.isEmpty()) {
                         paymentHistoryRecycler.visibility = View.GONE
+                        emptyStatePayments.visibility = View.VISIBLE
+                        
+                        val tvTitle = emptyStatePayments.findViewById<TextView>(R.id.tvEmptyTitle)
+                        val tvSubtitle = emptyStatePayments.findViewById<TextView>(R.id.tvEmptySubtitle)
+                        tvTitle.text = "No Payment History"
+                        tvSubtitle.text = "Your recent payments will appear here."
                     } else {
                         paymentHistoryRecycler.visibility = View.VISIBLE
+                        emptyStatePayments.visibility = View.GONE
                         
                         // Convert to PaymentItem format
                         val formatCurrency = NumberFormat.getCurrencyInstance(Locale("en", "PH"))
@@ -115,6 +136,7 @@ class PaymentsFragment : Fragment() {
                         
                         val paymentItems = payments.map { payment ->
                             PaymentItem(
+                                id = payment.payment_id,
                                 type = payment.loan_type ?: "Loan Payment",
                                 date = try {
                                     val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).parse(payment.payment_date)
@@ -123,7 +145,8 @@ class PaymentsFragment : Fragment() {
                                     payment.payment_date
                                 },
                                 amount = formatCurrency.format(payment.amount),
-                                status = payment.status
+                                status = payment.status,
+                                orNumber = payment.orNumber
                             )
                         }
                         
@@ -131,11 +154,12 @@ class PaymentsFragment : Fragment() {
                         paymentHistoryRecycler.adapter = PaymentHistoryAdapter(paymentItems)
                     }
                 } else {
-                    Toast.makeText(context, "Failed to load payment history", Toast.LENGTH_SHORT).show()
+                   paymentHistoryRecycler.visibility = View.GONE
+                   emptyStatePayments.visibility = View.VISIBLE
                 }
             } catch (e: Exception) {
-                Toast.makeText(context, "Network error: ${e.message}", Toast.LENGTH_SHORT).show()
-                e.printStackTrace()
+               paymentHistoryRecycler.visibility = View.GONE
+               emptyStatePayments.visibility = View.VISIBLE
             }
         }
     }
@@ -155,10 +179,11 @@ class PaymentsFragment : Fragment() {
         val rawMonthly: Double 
     )
     
-    data class PaymentItem(val type: String, val date: String, val amount: String, val status: String)
+    data class PaymentItem(val id: Int, val type: String, val date: String, val amount: String, val status: String, val orNumber: String?)
 
     // Adapters
     inner class ActiveLoanAdapter(private val items: List<ActiveLoan>) : RecyclerView.Adapter<ActiveLoanAdapter.ViewHolder>() {
+        
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val type: TextView = view.findViewById(R.id.loanType)
             val id: TextView = view.findViewById(R.id.loanId)
@@ -203,27 +228,31 @@ class PaymentsFragment : Fragment() {
     }
 
     private fun showPaymentDialog(loan: ActiveLoan) {
-        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_payment_method, null)
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_payment_method_modern, null)
         
         // Find views
-        val textAmount = dialogView.findViewById<TextView>(R.id.textAmount)
+        val payBillName = dialogView.findViewById<TextView>(R.id.payBillName)
+        val payAmount = dialogView.findViewById<TextView>(R.id.payAmount)
+        val payDueDate = dialogView.findViewById<TextView>(R.id.payDueDate)
         val radioGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.radioGroupPayment)
-        val btnCancel = dialogView.findViewById<android.widget.Button>(R.id.btnCancel)
-        val btnConfirm = dialogView.findViewById<android.widget.Button>(R.id.btnConfirm)
+        val btnClose = dialogView.findViewById<View>(R.id.btnClosePayment)
+        val btnProceed = dialogView.findViewById<android.widget.Button>(R.id.btnProceedPay)
         
         // Set data
-        textAmount.text = "Amount: ${loan.monthly}"
+        payBillName.text = "${loan.type} #${loan.loanId}"
+        payAmount.text = loan.monthly
+        payDueDate.text = "Due on ${loan.due}"
         
-        val dialog = android.app.AlertDialog.Builder(context)
-            .setView(dialogView)
-            .setCancelable(false)
-            .create()
-            
-        dialog.apply {
-           window?.setBackgroundDrawableResource(android.R.color.transparent)
+        // Use BottomSheetDialog for modern feel
+        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext())
+        dialog.setContentView(dialogView)
+        dialog.behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+
+        btnClose.setOnClickListener {
+            dialog.dismiss()
         }
 
-        btnConfirm.setOnClickListener {
+        btnProceed.setOnClickListener {
             val selectedId = radioGroup.checkedRadioButtonId
             if (selectedId == -1) {
                 Toast.makeText(context, "Please select a payment method", Toast.LENGTH_SHORT).show()
@@ -233,6 +262,37 @@ class PaymentsFragment : Fragment() {
             val selectedRb = dialogView.findViewById<android.widget.RadioButton>(selectedId)
             val method = selectedRb.text.toString()
             
+            dialog.dismiss()
+            
+            // Proceed to Confirmation
+            showPaymentConfirmationDialog(loan, method)
+        }
+        
+        dialog.show()
+    }
+    
+    private fun showPaymentConfirmationDialog(loan: ActiveLoan, method: String) {
+        val context = context ?: return
+        
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_payment_confirmation, null)
+        val confirmAmount = dialogView.findViewById<TextView>(R.id.confirmAmount)
+        val confirmBillName = dialogView.findViewById<TextView>(R.id.confirmBillName)
+        val confirmMethod = dialogView.findViewById<TextView>(R.id.confirmMethod)
+        val btnConfirm = dialogView.findViewById<android.widget.Button>(R.id.btnConfirmPayment)
+        val btnCancel = dialogView.findViewById<android.widget.Button>(R.id.btnCancelPayment)
+        
+        confirmAmount.text = loan.monthly
+        confirmBillName.text = "${loan.type} #${loan.loanId}"
+        confirmMethod.text = method
+        
+        val dialog = android.app.AlertDialog.Builder(context)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+            
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        
+        btnConfirm.setOnClickListener {
             dialog.dismiss()
             processPayment(loan, method)
         }
@@ -306,12 +366,76 @@ class PaymentsFragment : Fragment() {
         // Deprecated or kept for future use
     }
 
+    private fun showWebViewDialog(url: String, title: String) {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_webview, null)
+        
+        // Find views
+        val tvTitle = dialogView.findViewById<TextView>(R.id.tvWebViewTitle)
+        val btnClose = dialogView.findViewById<View>(R.id.btnCloseWebView)
+        val webView = dialogView.findViewById<android.webkit.WebView>(R.id.webview)
+        val progressBar = dialogView.findViewById<ProgressBar>(R.id.webViewProgressBar)
+        
+        tvTitle.text = title
+        
+        // Configure WebView
+        webView.settings.javaScriptEnabled = true
+        webView.settings.domStorageEnabled = true
+        webView.settings.loadWithOverviewMode = true
+        webView.settings.useWideViewPort = true
+        webView.settings.builtInZoomControls = true
+        webView.settings.displayZoomControls = false
+        
+        // Handle page loading
+        webView.webViewClient = object : android.webkit.WebViewClient() {
+            override fun onPageStarted(view: android.webkit.WebView?, url: String?, favicon: android.graphics.Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                progressBar.visibility = View.VISIBLE
+            }
+            
+            override fun onPageFinished(view: android.webkit.WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                progressBar.visibility = View.GONE
+            }
+            
+            override fun shouldOverrideUrlLoading(view: android.webkit.WebView?, request: android.webkit.WebResourceRequest?): Boolean {
+                return false // Keep links inside WebView
+            }
+        }
+        
+        webView.loadUrl(url)
+        
+        // Setup Dialog
+        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext())
+        dialog.setContentView(dialogView)
+        
+        // Make it full height
+        val parentLayout = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+        parentLayout?.let { bottomSheet ->
+            val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(bottomSheet)
+            behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+            behavior.skipCollapsed = true
+            
+            // Set height to match parent
+            val layoutParams = bottomSheet.layoutParams
+            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+            bottomSheet.layoutParams = layoutParams
+        }
+        
+        btnClose.setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialog.show()
+    }
+
     inner class PaymentHistoryAdapter(private val items: List<PaymentItem>) : RecyclerView.Adapter<PaymentHistoryAdapter.ViewHolder>() {
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val type: TextView = view.findViewById(R.id.payType)
             val date: TextView = view.findViewById(R.id.payDate)
             val amount: TextView = view.findViewById(R.id.payAmount)
             val status: TextView = view.findViewById(R.id.payStatus)
+            val or: TextView? = view.findViewById(R.id.payOr)
+            val btnReceipt: com.google.android.material.button.MaterialButton = view.findViewById(R.id.btnViewReceipt)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -325,6 +449,24 @@ class PaymentsFragment : Fragment() {
             holder.date.text = item.date
             holder.amount.text = item.amount
             holder.status.text = item.status.uppercase()
+            
+            if (!item.orNumber.isNullOrEmpty()) {
+                holder.or?.text = "OR: ${item.orNumber}"
+                holder.or?.visibility = View.VISIBLE
+            } else {
+                holder.or?.visibility = View.GONE
+            }
+            
+            // Show Receipt Button if Verified and has OR
+            if (item.status.equals("verified", ignoreCase = true) && !item.orNumber.isNullOrEmpty()) {
+                holder.btnReceipt.visibility = View.VISIBLE
+                holder.btnReceipt.setOnClickListener {
+                     val url = "http://10.0.2.2/bdo/admin/receipt.php?payment_id=${item.id}"
+                     showWebViewDialog(url, "Payment Receipt")
+                }
+            } else {
+                holder.btnReceipt.visibility = View.GONE
+            }
         }
 
         override fun getItemCount() = items.size

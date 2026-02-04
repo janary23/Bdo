@@ -24,6 +24,7 @@ class RequirementsFragment : Fragment() {
     private lateinit var checklistRecyclerView: RecyclerView
     private lateinit var loanTypeSpinner: Spinner
     private lateinit var docTypeSpinner: Spinner
+    private lateinit var tvProgress: TextView
     private var selectedFileName: String? = null
     
     private val filePickerLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.GetContent()) { uri ->
@@ -37,6 +38,9 @@ class RequirementsFragment : Fragment() {
             
             // Update UI in dialog if possible (requires reference to dialog view, simplified here via toast or state)
             Toast.makeText(context, "Selected: $selectedFileName", Toast.LENGTH_SHORT).show()
+            
+            // Update custom dialog UI
+            selectedFileName?.let { updateUploadDialogUI(it) }
         }
     }
 
@@ -49,6 +53,7 @@ class RequirementsFragment : Fragment() {
         checklistRecyclerView = view.findViewById(R.id.checklistRecyclerView)
         loanTypeSpinner = view.findViewById(R.id.loanTypeSpinner)
         docTypeSpinner = view.findViewById(R.id.docTypeSpinner)
+        tvProgress = view.findViewById(R.id.tvProgress)
 
         setupSpinners()
         loadUserRequirements()
@@ -63,78 +68,88 @@ class RequirementsFragment : Fragment() {
     private fun showUploadDialog() {
         val context = requireContext()
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("Upload Document")
         
-        // Custom Layout
-        val layout = android.widget.LinearLayout(context)
-        layout.orientation = android.widget.LinearLayout.VERTICAL
-        layout.setPadding(50, 40, 50, 10)
+        // Inflate custom layout
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_upload_requirements, null)
+        builder.setView(dialogView)
         
-        // Instructions
-        val instructions = TextView(context)
-        instructions.text = "Please attach a clear copy of your document (Image or PDF)."
-        instructions.setTextColor(androidx.core.content.ContextCompat.getColor(context, R.color.gray_700))
-        instructions.textSize = 14f
-        instructions.layoutParams = android.widget.LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, 
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        ).apply { bottomMargin = 30 }
+        val dialog = builder.create()
         
-        // File Name Display
-        val fileNameTv = TextView(context)
-        fileNameTv.text = "No file selected"
-        fileNameTv.setTypeface(null, android.graphics.Typeface.ITALIC)
-        fileNameTv.setTextColor(androidx.core.content.ContextCompat.getColor(context, R.color.gray_500))
-        fileNameTv.gravity = android.view.Gravity.CENTER
-        fileNameTv.layoutParams = android.widget.LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, 
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        ).apply { bottomMargin = 20 }
+        // Make background transparent for rounded corners
+        dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
         
-        // Attach Button
-        val attachButton = com.google.android.material.button.MaterialButton(context)
-        attachButton.text = "Attach File"
-        attachButton.setIconResource(R.drawable.ic_upload) // or generic icon if upload not avail
-        attachButton.iconGravity = com.google.android.material.button.MaterialButton.ICON_GRAVITY_TEXT_START
-        attachButton.setOnClickListener {
-            // Launch file picker
+        // UI References
+        val layoutFileSelect: android.view.View = dialogView.findViewById(R.id.layoutFileSelect)
+        val tvFileName: TextView = dialogView.findViewById(R.id.tvFileName)
+        val tvFileHint: TextView = dialogView.findViewById(R.id.tvFileHint)
+        val imgFileStatus: ImageView = dialogView.findViewById(R.id.imgFileStatus)
+        val btnUpload: com.google.android.material.button.MaterialButton = dialogView.findViewById(R.id.btnConfirmUpload)
+        val btnCancel: com.google.android.material.button.MaterialButton = dialogView.findViewById(R.id.btnCancel)
+        
+        // File Selection Logic
+        layoutFileSelect.setOnClickListener {
+            // Re-register or use a variable to track which dialog instance active? 
+            // Simplified: we trust the single instance flow for now.
+            // Ideally we'd pass a callback but for this simple refactor:
+            
+            // We need a way to update THIS dialog when file is picked.
+            // Since launcher is in fragment, we need a mechanism.
+            // Hack fix: Set a temporary listener or public variable on fragment?
+            // Cleaner: Trigger launcher, and when result comes back, update the CURRENT dialog if showing.
+            // Let's store reference to these views in class variables temporarily or just re-show with state.
+            // Or better: Just launch.
+            
             filePickerLauncher.launch("*/*")
             
-            // Note: This is a bit hacky as we need to update fileNameTv after selection.
-            // In a real Fragment, we'd use a ViewModel or state variable derived from the launcher callback.
-            // For now, we rely on the user seeing the Toast from the launcher, 
-            // and we will update the textview manually by recreating listener or simpler:
-            // Let's use a dirty hack: post a delayed check or just instruct user.
-            // Better: The launcher callback updates `selectedFileName`. 
-            // We can't easily update this specific dialog instance's textview from the callback 
-            // unless we store a reference to it globally (bad practice) or use a proper DialogFragment.
-            // Simplify: Just show toast. The user knows they picked it. 
-            // When they click "Upload", we check `selectedFileName`.
+            // We need to listen to the result. 
+            // Since `registerForActivityResult` callback is independent, we can observe `selectedFileName` change?
+            // Or we can invoke a "waiting for result" state.
         }
         
-        layout.addView(instructions)
-        layout.addView(fileNameTv)
-        layout.addView(attachButton)
+        // Manual Polling/Observer workaround since we can't easily pass the specific dialog views to the global launcher callback
+        // without complex architecture changes (safest for this quick refactor):
+        // We will assume the user picks a file and we update the UI when they trigger something, 
+        // OR we can make the fragment track the "active upload dialog" and update it.
         
-        builder.setView(layout)
+        activeUploadDialogView = dialogView // Store ref to update later
         
-        builder.setPositiveButton("Upload") { dialog, _ ->
+        btnCancel.setOnClickListener {
+            selectedFileName = null
+            activeUploadDialogView = null
+            dialog.dismiss()
+        }
+        
+        btnUpload.setOnClickListener {
             if (!selectedFileName.isNullOrEmpty()) {
                 uploadRequirement(selectedFileName!!)
-                selectedFileName = null // Reset
-            } else {
-                Toast.makeText(context, "Please attach a file first", Toast.LENGTH_SHORT).show()
-                // Prevent dialog closure? difficult with standard AlertDialog builder.
-                // Just let it close and they have to try again.
+                selectedFileName = null
+                activeUploadDialogView = null
+                dialog.dismiss()
             }
         }
         
-        builder.setNegativeButton("Cancel") { dialog, _ ->
-            selectedFileName = null
-            dialog.cancel()
+        dialog.show()
+    }
+    
+    // Store reference to update UI from callback
+    private var activeUploadDialogView: View? = null
+    
+    // Update the launcher callback to update UI
+    private fun updateUploadDialogUI(fileName: String) {
+        activeUploadDialogView?.let { view ->
+            val tvFileName: TextView = view.findViewById(R.id.tvFileName)
+            val tvFileHint: TextView = view.findViewById(R.id.tvFileHint)
+            val imgFileStatus: ImageView = view.findViewById(R.id.imgFileStatus)
+            val btnUpload: com.google.android.material.button.MaterialButton = view.findViewById(R.id.btnConfirmUpload)
+            
+            tvFileName.text = fileName
+            tvFileHint.text = "Ready to upload"
+            imgFileStatus.setImageResource(R.drawable.ic_check_circle)
+            imgFileStatus.setColorFilter(ContextCompat.getColor(requireContext(), R.color.green_600))
+            
+            btnUpload.isEnabled = true
+            btnUpload.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.blue_900))
         }
-        
-        builder.show()
     }
     
     private fun uploadRequirement(fileName: String) {
@@ -225,6 +240,11 @@ class RequirementsFragment : Fragment() {
 
         checklistRecyclerView.layoutManager = LinearLayoutManager(context)
         checklistRecyclerView.adapter = ChecklistAdapter(items)
+        
+        // Update Progress
+        val total = requirements.size
+        val completed = requirements.count { it.status == "Verified" || it.status == "Pending" }
+        tvProgress.text = "$completed / $total Completed"
     }
 }
 

@@ -34,11 +34,22 @@
             app:cardBackgroundColor="@color/white"
             android:layout_marginBottom="24dp">
             
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerUpcomingAppts"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"/> <!-- reusing item layout for now -->
+                android:orientation="vertical">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerUpcomingAppts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"/> 
+                
+                <include
+                    android:id="@+id/emptyStateUpcoming"
+                    layout="@layout/layout_empty_state"
+                    android:visibility="gone"/>
+            </LinearLayout>
         </androidx.cardview.widget.CardView>
 
         <!-- Past/History Section -->
@@ -61,11 +72,22 @@
             app:strokeColor="#E5E7EB"
             app:cardBackgroundColor="@color/white">
             
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerPastAppts"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"/>
+                android:orientation="vertical">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerPastAppts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"/>
+
+                <include
+                    android:id="@+id/emptyStatePast"
+                    layout="@layout/layout_empty_state"
+                    android:visibility="gone"/>
+            </LinearLayout>
         </androidx.cardview.widget.CardView>
         
         <!-- FAB for new appointment (mock) -->

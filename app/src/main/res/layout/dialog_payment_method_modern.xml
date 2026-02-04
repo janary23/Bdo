@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_bottom_sheet"
+    android:paddingBottom="24dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="20dp"
+        android:background="@drawable/bg_bottom_sheet_header">
+
+        <ImageView
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_payment"
+            app:tint="@color/blue_900"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Pay Bill"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/blue_900"
+            android:layout_marginStart="16dp"/>
+        
+        <ImageView
+            android:id="@+id/btnClosePayment"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_close"
+            app:tint="@color/gray_500"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?selectableItemBackgroundBorderless"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E5E7EB"/>
+
+    <!-- Bill Summary -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:background="#F9FAFB">
+        
+        <TextView
+            android:id="@+id/payBillName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Personal Loan #1001"
+            android:textColor="@color/gray_700"
+            android:textSize="14sp"/>
+            
+        <TextView
+            android:id="@+id/payAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="₱1,850.00"
+            android:textColor="@color/blue_900"
+            android:textStyle="bold"
+            android:textSize="28sp"
+            android:layout_marginTop="4dp"/>
+            
+        <TextView
+            android:id="@+id/payDueDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Due on Feb 15, 2024"
+            android:textColor="@color/red_600"
+            android:textSize="12sp"
+            android:background="@drawable/bg_info_box"
+            android:backgroundTint="#FEF2F2"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:layout_marginTop="8dp"/>
+    </LinearLayout>
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Payment Method"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="16dp"/>
+
+    <RadioGroup
+        android:id="@+id/radioGroupPayment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp">
+
+        <!-- BDO Online -->
+        <RadioButton
+            android:id="@+id/rbBDO"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="BDO Online Banking"
+            android:textSize="16sp"
+            android:paddingVertical="12dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_input_field"
+            android:buttonTint="@color/blue_900"
+            android:paddingStart="12dp"
+            android:drawableEnd="@drawable/ic_account_balance"
+            android:drawableTint="@color/blue_900"
+            android:paddingEnd="16dp"/>
+
+        <!-- GCash -->
+        <RadioButton
+            android:id="@+id/rbGcash"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="GCash"
+            android:textSize="16sp"
+            android:paddingVertical="12dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_input_field"
+            android:buttonTint="@color/blue_900"
+            android:paddingStart="12dp"/>
+
+        <!-- Maya -->
+        <RadioButton
+            android:id="@+id/rbMaya"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Maya"
+            android:textSize="16sp"
+            android:paddingVertical="12dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_input_field"
+            android:buttonTint="@color/blue_900"
+            android:paddingStart="12dp"/>
+            
+        <!-- Other -->
+        <RadioButton
+            android:id="@+id/rbOther"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Other Bank Transfer"
+            android:textSize="16sp"
+            android:paddingVertical="12dp"
+            android:background="@drawable/bg_input_field"
+            android:buttonTint="@color/blue_900"
+            android:paddingStart="12dp"/>
+
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/btnProceedPay"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="32dp"
+        android:text="Continue"
+        android:backgroundTint="@color/blue_900"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:cornerRadius="8dp"/>
+
+</LinearLayout>

@@ -27,6 +27,13 @@
         android:layout_height="wrap_content"
         android:text="Select Time"
         android:textStyle="bold"
+        android:layout_marginBottom="2dp"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Booking time: 9:00 AM - 4:00 PM"
+        android:textColor="#F59E0B"
+        android:textSize="12sp"
         android:layout_marginBottom="4dp"/>
     <EditText
         android:id="@+id/etTime"

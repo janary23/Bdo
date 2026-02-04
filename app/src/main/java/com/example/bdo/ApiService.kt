@@ -159,6 +159,12 @@ interface ApiService {
         @Field("time_scheduled") timeScheduled: String,
         @Field("notes") notes: String?
     ): Response<CreateAppointmentResponse>
+
+    @FormUrlEncoded
+    @POST("update_walkthrough_status.php")
+    suspend fun updateWalkthroughStatus(
+        @Field("user_id") userId: Int
+    ): Response<UpdateProfileResponse>
     
     // ============================================
     // NOTIFICATIONS

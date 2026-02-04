@@ -172,7 +172,9 @@ data class User(
     val monthly_income: Double? = 0.0,
     val occupation: String? = "Employed",
     val status: String,
-    val created_at: String?
+    val created_at: String?,
+    @SerializedName("has_seen_walkthrough")
+    val hasSeenWalkthrough: Int? = 0
 )
 
 data class Loan(
@@ -203,7 +205,9 @@ data class Payment(
     val payment_date: String,
     val status: String,
     val loan_type: String?,
-    val reference_number: String?
+    val reference_number: String?,
+    @SerializedName("or_number")
+    val orNumber: String?
 )
 
 data class Requirement(
@@ -225,19 +229,19 @@ data class Requirement(
 )
 
 data class Appointment(
-    @SerializedName("AppointmentID")
+    @SerializedName(value = "appointment_id", alternate = ["AppointmentID"])
     val id: Int,
     
-    @SerializedName("DateScheduled")
+    @SerializedName(value = "appointment_date", alternate = ["DateScheduled", "date_scheduled"])
     val date: String,
     
-    @SerializedName("TimeScheduled")
+    @SerializedName(value = "appointment_time", alternate = ["TimeScheduled", "time_scheduled"])
     val time: String,
     
-    @SerializedName("Status")
+    @SerializedName(value = "status", alternate = ["Status"])
     val status: String,
     
-    @SerializedName("Notes")
+    @SerializedName(value = "purpose", alternate = ["Notes", "notes"])
     val notes: String?
 )
 

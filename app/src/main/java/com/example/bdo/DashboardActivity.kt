@@ -3,8 +3,11 @@ package com.example.bdo
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class DashboardActivity : AppCompatActivity() {
 
@@ -14,7 +17,9 @@ class DashboardActivity : AppCompatActivity() {
 
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
-        supportActionBar?.title = "Dashboard"
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+
+
 
         // Initialize custom navigation
         setupNavigation()
@@ -24,6 +29,9 @@ class DashboardActivity : AppCompatActivity() {
             loadFragment(DashboardFragment())
             updateNavigationUI(R.id.nav_dashboard)
         }
+        
+        // Check for welcome walkthrough
+        checkWalkthroughStatus()
     }
 
     private fun setupNavigation() {
@@ -47,27 +55,27 @@ class DashboardActivity : AppCompatActivity() {
         when (id) {
             R.id.nav_dashboard -> {
                 loadFragment(DashboardFragment())
-                supportActionBar?.title = "Dashboard"
+
             }
             R.id.nav_applications -> {
                 loadFragment(ApplyFragment())
-                supportActionBar?.title = "Apply Loan"
+
             }
             R.id.nav_payments -> {
                 loadFragment(PaymentsFragment())
-                supportActionBar?.title = "Payments"
+
             }
             R.id.nav_requirements -> {
                 loadFragment(RequirementsFragment())
-                supportActionBar?.title = "Requirements"
+
             }
             R.id.nav_appointments -> {
                 loadFragment(AppointmentsFragment())
-                supportActionBar?.title = "Appointments"
+
             }
             R.id.nav_profile -> {
                 loadFragment(ProfileFragment())
-                supportActionBar?.title = "Profile"
+
             }
         }
         updateNavigationUI(id)
@@ -105,5 +113,57 @@ class DashboardActivity : AppCompatActivity() {
         val transaction = supportFragmentManager.beginTransaction()
         transaction.replace(R.id.fragmentContainer, fragment)
         transaction.commit()
+    }
+    
+    private fun checkWalkthroughStatus() {
+        val userId = SessionManager.getUserId(this)
+        android.util.Log.d("WalkthroughDebug", "=== CHECKING WALKTHROUGH STATUS ===")
+        android.util.Log.d("WalkthroughDebug", "User ID: $userId")
+        
+        if (userId == 0) {
+            android.util.Log.d("WalkthroughDebug", "User ID is 0, returning early")
+            return
+        }
+        
+        lifecycleScope.launch {
+            try {
+                android.util.Log.d("WalkthroughDebug", "Making API call to getUserProfile...")
+                val response = ApiClient.apiService.getUserProfile(userId)
+                
+                android.util.Log.d("WalkthroughDebug", "API Response Code: ${response.code()}")
+                android.util.Log.d("WalkthroughDebug", "API Response Successful: ${response.isSuccessful}")
+                android.util.Log.d("WalkthroughDebug", "Response Body Success: ${response.body()?.success}")
+                
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val user = response.body()?.user
+                    android.util.Log.d("WalkthroughDebug", "User object: $user")
+                    android.util.Log.d("WalkthroughDebug", "hasSeenWalkthrough value: ${user?.hasSeenWalkthrough}")
+                    android.util.Log.d("WalkthroughDebug", "hasSeenWalkthrough type: ${user?.hasSeenWalkthrough?.javaClass?.simpleName}")
+                    
+                    // Check if user has NOT seen walkthrough (0 or null)
+                    if (user?.hasSeenWalkthrough == 0 || user?.hasSeenWalkthrough == null) {
+                        android.util.Log.d("WalkthroughDebug", "✓ SHOWING WALKTHROUGH DIALOG")
+                        try {
+                            if (!supportFragmentManager.isStateSaved) {
+                                WelcomeWalkthroughDialog().show(
+                                    supportFragmentManager, 
+                                    WelcomeWalkthroughDialog.TAG
+                                )
+                            }
+                        } catch (e: Exception) {
+                            android.util.Log.e("WalkthroughDebug", "Failed to show dialog", e)
+                        }
+                    } else {
+                        android.util.Log.d("WalkthroughDebug", "✗ NOT showing walkthrough (user has seen it)")
+                    }
+                } else {
+                    android.util.Log.e("WalkthroughDebug", "API call failed or success=false")
+                    android.util.Log.e("WalkthroughDebug", "Response body: ${response.body()}")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("WalkthroughDebug", "Exception in checkWalkthroughStatus", e)
+                e.printStackTrace()
+            }
+        }
     }
 }

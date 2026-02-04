@@ -42,6 +42,7 @@ class ApplyFragment : Fragment() {
     private lateinit var creditPercentageText: TextView
     private lateinit var creditLimitProgress: ProgressBar
     private lateinit var maxAmountText: TextView
+    private lateinit var totalLimitText: TextView
     
     // Booster & Requirements
     private lateinit var boosterHeader: LinearLayout
@@ -52,7 +53,6 @@ class ApplyFragment : Fragment() {
     
     // Pending Applications Views
     private lateinit var pendingApplicationsCard: CardView
-    private lateinit var pendingApplicationsList: LinearLayout
     private lateinit var pendingAppsCount: TextView
 
     private var selectedType = "Personal Loan"
@@ -126,7 +126,9 @@ class ApplyFragment : Fragment() {
             usedCreditText = view.findViewById(R.id.usedCreditText)
             creditPercentageText = view.findViewById(R.id.creditPercentageText)
             creditLimitProgress = view.findViewById(R.id.creditLimitProgress)
+            creditLimitProgress = view.findViewById(R.id.creditLimitProgress)
             maxAmountText = view.findViewById(R.id.maxAmountText)
+            totalLimitText = view.findViewById(R.id.totalLimitText)
             
             // Booster
             boosterHeader = view.findViewById(R.id.boosterHeader)
@@ -138,7 +140,6 @@ class ApplyFragment : Fragment() {
             
             // Pending Applications
             pendingApplicationsCard = view.findViewById(R.id.pendingApplicationsCard)
-            pendingApplicationsList = view.findViewById(R.id.pendingApplicationsList)
             pendingAppsCount = view.findViewById(R.id.pendingAppsCount)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -232,45 +233,84 @@ class ApplyFragment : Fragment() {
         }
     }
     
+    // Store reference to the list of apps for the dialog
+    private var currentPendingApps: List<LoanApplication> = emptyList()
+
     private fun populatePendingApplications(applications: List<LoanApplication>) {
-        if (context == null || !::pendingApplicationsList.isInitialized) return
+        // Just update the card count and storing the data for the dialog
+        if (context == null) return
         
-        pendingApplicationsList.removeAllViews()
+        currentPendingApps = applications
         
-        if (applications.isEmpty()) {
-            pendingApplicationsCard.visibility = View.GONE
-            return
-        }
-        
+        // Always show the card as an entry point
         pendingApplicationsCard.visibility = View.VISIBLE
         pendingAppsCount.text = applications.size.toString()
         
-        val inflater = LayoutInflater.from(context)
+        // Setup click listener
+        pendingApplicationsCard.setOnClickListener {
+            showPendingApplicationsDialog()
+        }
+    }
+    
+    private fun showPendingApplicationsDialog() {
+        if (context == null) return
         
-        for (app in applications) {
-            val itemView = inflater.inflate(R.layout.item_pending_application, pendingApplicationsList, false)
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_pending_applications, null)
+        val container = dialogView.findViewById<LinearLayout>(R.id.dialogPendingList)
+        val btnClose = dialogView.findViewById<View>(R.id.btnCloseDialog)
+        
+        // Use BottomSheetDialog instead of AlertDialog
+        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(requireContext())
+        dialog.setContentView(dialogView)
+        
+        // No need to set background transparent for the window itself if using standard bottom sheet
+        // but often good practice if custom background is used on the view
+        // dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        
+        // Populate the list
+        container.removeAllViews()
+        
+        if (currentPendingApps.isEmpty()) {
+             // Use empty state logic
+            val emptyView = LayoutInflater.from(context).inflate(R.layout.layout_empty_state, container, false)
+            val tvTitle = emptyView.findViewById<TextView>(R.id.tvEmptyTitle)
+            val tvSubtitle = emptyView.findViewById<TextView>(R.id.tvEmptySubtitle)
             
-            val loanType = itemView.findViewById<TextView>(R.id.pendingAppLoanType)
-            val amount = itemView.findViewById<TextView>(R.id.pendingAppAmount)
-            val date = itemView.findViewById<TextView>(R.id.pendingAppDate)
-            
-            loanType.text = app.loan_type
-            amount.text = "₱${String.format("%,.2f", app.amount)}"
-            
-            // Format date
-            try {
-                val dateStr = app.applied_date ?: ""
-                if (dateStr.isNotEmpty()) {
-                    date.text = "Applied: $dateStr"
-                } else {
+            tvTitle.text = "No Pending Applications"
+            tvSubtitle.text = "Any new loan applications you make will be displayed here."
+            container.addView(emptyView)
+        } else {
+             val inflater = LayoutInflater.from(context)
+             for (app in currentPendingApps) {
+                val itemView = inflater.inflate(R.layout.item_pending_application, container, false)
+                
+                val loanType = itemView.findViewById<TextView>(R.id.pendingAppLoanType)
+                val amount = itemView.findViewById<TextView>(R.id.pendingAppAmount)
+                val date = itemView.findViewById<TextView>(R.id.pendingAppDate)
+                
+                loanType.text = app.loan_type
+                amount.text = "₱${String.format("%,.2f", app.amount)}"
+                
+                try {
+                    val dateStr = app.applied_date ?: ""
+                    if (dateStr.isNotEmpty()) {
+                        date.text = "Applied: $dateStr"
+                    } else {
+                        date.text = "Applied: Recently"
+                    }
+                } catch (e: Exception) {
                     date.text = "Applied: Recently"
                 }
-            } catch (e: Exception) {
-                date.text = "Applied: Recently"
+                
+                container.addView(itemView)
             }
-            
-            pendingApplicationsList.addView(itemView)
         }
+        
+        btnClose.setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        dialog.show()
     }
     
     private fun loadUserRequirements() {
@@ -351,8 +391,11 @@ class ApplyFragment : Fragment() {
                 return
             }
             
-            // The main display should show TOTAL CREDIT LIMIT, not available
-            creditLimitAmount.text = "₱${String.format("%,.2f", creditLimit)}"
+            // The main display should show AVAILABLE CREDIT to match the label
+            creditLimitAmount.text = "₱${String.format("%,.2f", availableCredit)}"
+            
+            // Subtitle shows TOTAL LIMIT
+            totalLimitText.text = "Out of ₱${String.format("%,.2f", creditLimit)} Limit"
             
             // Calculate used credit (total balance)
             val usedCredit = creditLimit - availableCredit
